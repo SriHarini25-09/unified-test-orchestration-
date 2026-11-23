@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+reports/
+user_projects/
+.pytest_cache/
+.playwright/
+*.log
