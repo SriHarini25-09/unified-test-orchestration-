@@ -1,0 +1,22 @@
+[
+  {
+    "name": "health endpoint",
+    "method": "GET",
+    "path": "/health",
+    "expected_status": 200,
+    "expected_json_subset": { "status": "ok" }
+  },
+  {
+    "name": "get item by id",
+    "method": "GET",
+    "path": "/items/1",
+    "expected_status": 200
+  },
+  {
+    "name": "invalid login rejected",
+    "method": "POST",
+    "path": "/login",
+    "json": { "username": "bad", "password": "bad" },
+    "expected_status": 401
+  }
+]

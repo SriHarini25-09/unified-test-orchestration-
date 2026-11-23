@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unified Test Orchestration and Failure Analysis System</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">UT</div>
+        <div>
+          <h1 class="brand-title">Unified Test Orchestration <span>&amp; Failure Analysis System</span></h1>
+          <p class="brand-subtitle">One intelligent pipeline for unit, API, and UI validation</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        {% if has_report %}
+          <span class="status-chip status-{{ report.overall_status.value }}">
+            <i></i>{{ report.overall_status.value|upper }}
+          </span>
+        {% else %}
+          <span class="status-chip status-idle"><i></i>NO REPORT</span>
+        {% endif %}
+        <button id="runBtn" class="btn btn-ghost" type="button">Run demo tests</button>
+      </div>
+    </header>
+
+    <nav class="stepper" aria-label="Dashboard pages">
+      <button class="step active" type="button" data-page="intro"><span class="step-no">1</span><span class="step-label">Start</span></button>
+      <button class="step" type="button" data-page="input"><span class="step-no">2</span><span class="step-label">Test Input</span></button>
+      <button class="step" type="button" data-page="summary"><span class="step-no">3</span><span class="step-label">Summary &amp; AI</span></button>
+      <button class="step" type="button" data-page="stages"><span class="step-no">4</span><span class="step-label">Stage Details</span></button>
+      <button class="step" type="button" data-page="reports"><span class="step-no">5</span><span class="step-label">Exit / Reports</span></button>
+    </nav>
+
+    <main class="workspace">
+      <!-- PAGE 1 -->
+      <section class="page active" id="intro">
+        <div class="hero panel">
+          <div class="hero-copy">
+            <span class="eyebrow">START HERE</span>
+            <h2>Start Your Test Run<br /><span>Unified Orchestration &amp; Failure Analysis</span></h2>
+            <p class="hero-text">
+              Paste Python source, run unit, API, and browser checks together, then open
+              one colorful summary with intelligent failure analysis — with or without AI.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" type="button" data-goto="input">Start Testing →</button>
+              <button class="btn btn-ghost" type="button" data-goto="summary">View latest report</button>
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <img class="core-img" src="/static/images/ai-icon.svg" alt="" />
+            <div class="node node-unit">UNIT</div>
+            <div class="node node-api">API</div>
+            <div class="node node-ui">UI</div>
+          </div>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card feature-unit">
+            <img class="feature-icon" src="/static/images/unit-icon.svg" alt="" />
+            <div><h3>Unit Stage</h3><p>pytest execution with JUnit parsing and local test generation.</p></div>
+          </article>
+          <article class="feature-card feature-api">
+            <img class="feature-icon" src="/static/images/api-icon.svg" alt="" />
+            <div><h3>API Stage</h3><p>Declarative HTTP checks for status codes and JSON payloads.</p></div>
+          </article>
+          <article class="feature-card feature-ui">
+            <img class="feature-icon" src="/static/images/ui-icon.svg" alt="" />
+            <div><h3>UI Stage</h3><p>Playwright browser verification for selectors and text.</p></div>
+          </article>
+        </div>
+
+        <div class="page-nav">
+          <span></span>
+          <button class="btn btn-primary" type="button" data-goto="input">Next: Test Input →</button>
+        </div>
+      </section>
+
+      <!-- PAGE 2 -->
+      <section class="page" id="input">
+        <section class="panel">
+          <div class="section-head">
+            <div class="ai-heading">
+              <img src="/static/images/unit-icon.svg" alt="" />
+              <div><h2>Test Your Own Source</h2><p class="section-meta">Configure a custom run across all three stages</p></div>
+            </div>
+            <span class="section-tag">CUSTOM RUN</span>
+          </div>
+          <p class="meta">
+            Paste Python source with or without tests. Tests written inside the source run
+            automatically; otherwise separate unit tests or local fallback tests are used.
+            Define API_TESTS, UI_TESTS, API_BASE_URL, and UI_BASE_URL in the source to run all three stages from one block.
+          </p>
+
+          <form id="customForm">
+            <div class="field-grid">
+              <label class="field">Project name
+                <input name="name" value="My Project" />
+              </label>
+              <label class="field">API base URL
+                <input name="api_base_url" value="http://127.0.0.1:8001" />
+              </label>
+              <label class="field">UI base URL
+                <input name="ui_base_url" value="http://127.0.0.1:8001" />
+              </label>
+            </div>
+
+            <div class="tabs" role="tablist">
+              <button class="tab active" type="button" data-tab="source">Source Code</button>
+              <button class="tab" type="button" data-tab="unit">Unit Test</button>
+              <button class="tab" type="button" data-tab="api">API Test JSON</button>
+              <button class="tab" type="button" data-tab="ui">UI Test</button>
+            </div>
+
+            <div class="tab-body">
+              <div class="tab-panel active" data-panel="source">
+                <label class="field code-field">Python source — tests may be included here
+                  <textarea name="source_code" rows="12" spellcheck="false"
+                    placeholder="def add(a, b):&#10;    return a + b&#10;&#10;def test_add():&#10;    assert add(2, 3) == 5"></textarea>
+                </label>
+              </div>
+              <div class="tab-panel" data-panel="unit">
+                <label class="field code-field">pytest unit tests (leave blank to auto-generate)
+                  <textarea name="unit_tests" rows="12" spellcheck="false"
+                    placeholder="from source import add&#10;&#10;def test_add():&#10;    assert add(2, 3) == 5"></textarea>
+                </label>
+              </div>
+              <div class="tab-panel" data-panel="api">
+                <label class="field code-field">API tests JSON
+                  <textarea name="api_tests" rows="12" spellcheck="false" placeholder='[{"name":"health endpoint","method":"GET","path":"/health","expected_status":200}]'></textarea>
+                </label>
+              </div>
+              <div class="tab-panel" data-panel="ui">
+                <label class="field code-field">UI tests JSON
+                  <textarea name="ui_tests" rows="12" spellcheck="false" placeholder='[{"name":"login page renders sign-in form","path":"/","selector":"form#login","expected_text":"Sign in"}]'></textarea>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-run">Run Custom Test</button>
+              <p id="customStatus" class="meta status-text"></p>
+            </div>
+          </form>
+        </section>
+
+        <div class="page-nav">
+          <button class="btn btn-ghost" type="button" data-goto="intro">← Back: Overview</button>
+          <button class="btn btn-primary" type="button" data-goto="summary">Next: Summary &amp; AI →</button>
+        </div>
+      </section>
+
+      <!-- PAGE 3 -->
+      <section class="page" id="summary">
+        <div class="summary-card">
+          <div class="summary-card-head">
+            <div>
+              <h2>Test Summary</h2>
+              <p class="section-meta">{% if has_report %}Report {{ report.id }} · {{ report.generated_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC{% else %}No run yet — values appear after clicking Run Custom Test{% endif %}</p>
+            </div>
+            <span class="section-tag">UNIFIED REPORT</span>
+          </div>
+          <div class="table-wrap">
+            <table class="summary-table">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="row-overall">
+                  <td><span class="row-dot"></span>Overall</td>
+                  <td class="row-value row-text">{% if has_report %}{{ report.overall_status.value|upper }}{% endif %}</td>
+                  <td>Pipeline result</td>
+                </tr>
+                <tr class="row-total">
+                  <td><span class="row-dot"></span>Total Test</td>
+                  <td class="row-value">{% if has_report %}{{ report.total_tests }}{% endif %}</td>
+                  <td>Tests executed across all stages</td>
+                </tr>
+                <tr class="row-passed">
+                  <td><span class="row-dot"></span>Pass</td>
+                  <td class="row-value">{% if has_report %}{{ report.total_passed }}{% endif %}</td>
+                  <td>Successful tests</td>
+                </tr>
+                <tr class="row-failed">
+                  <td><span class="row-dot"></span>Failed</td>
+                  <td class="row-value">{% if has_report %}{{ report.total_failed }}{% endif %}</td>
+                  <td>Failed assertions</td>
+                </tr>
+                <tr class="row-error">
+                  <td><span class="row-dot"></span>Error</td>
+                  <td class="row-value">{% if has_report %}{{ report.total_errors }}{% endif %}</td>
+                  <td>Unexpected exceptions</td>
+                </tr>
+                <tr class="row-skipped">
+                  <td><span class="row-dot"></span>Skipped</td>
+                  <td class="row-value">{% if has_report %}{{ report.total_skipped }}{% endif %}</td>
+                  <td>Not executed</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <section class="panel ai-panel">
+          <div class="section-head">
+            <div class="ai-heading">
+              <img src="/static/images/ai-icon.svg" alt="" />
+              <div><h2>AI Failure Analysis</h2><p class="section-meta">Intelligent root-cause and fix recommendations</p></div>
+            </div>
+            <span class="section-tag ai-tag">INTELLIGENCE</span>
+          </div>
+
+          {% if report.ai.error %}<p class="notice">{{ report.ai.error }}</p>{% endif %}
+          {% if report.ai.summary %}<p class="ai-summary">{{ report.ai.summary }}</p>{% endif %}
+
+          {% if report.ai.root_causes %}
+            <h3 class="subhead">Likely root causes</h3>
+            <ul class="insight-list">
+              {% for rc in report.ai.root_causes %}
+                <li><span class="insight-key">{{ rc.test }}</span> {{ rc.cause }}
+                  <span class="confidence">{{ '%.0f'|format(rc.confidence * 100) }}%</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+
+          {% if report.ai.fix_suggestions %}
+            <h3 class="subhead">Suggested fixes</h3>
+            <ol class="insight-list">
+              {% for fix in report.ai.fix_suggestions %}<li>{{ fix }}</li>{% endfor %}
+            </ol>
+          {% endif %}
+
+          {% if report.ai.generated_test_cases %}
+            <h3 class="subhead">Suggested new test cases</h3>
+            <ul class="insight-list">
+              {% for test in report.ai.generated_test_cases %}<li>{{ test }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+        </section>
+
+        <div class="page-nav">
+          <button class="btn btn-ghost" type="button" data-goto="input">← Back: Test Input</button>
+          <button class="btn btn-primary" type="button" data-goto="stages">Next: Stage Details →</button>
+        </div>
+      </section>
+
+      <!-- PAGE 4 -->
+      <section class="page" id="stages">
+        {% if not report %}
+          <div class="panel empty">
+            <div class="empty-icon"><img src="/static/images/ui-icon.svg" alt="" /></div>
+            <h2>No stage details yet</h2>
+            <p>Stage-level results appear here after a run.</p>
+            <button class="btn btn-ghost" type="button" data-goto="summary">Back to summary</button>
+          </div>
+        {% else %}
+          <div class="section-head">
+            <div><h2>Stage Breakdown</h2><p class="section-meta">{% if has_report %}Every case, grouped by pipeline stage{% else %}No run yet — all stage counters are zero{% endif %}</p></div>
+            <span class="section-tag">DETAILS</span>
+          </div>
+
+          <div class="stage-stack">
+            {% for stage_name, stage in report.stages.items() %}
+              <article class="panel stage-card stage-{{ stage_name }}">
+                <div class="stage-head">
+                  <img class="stage-icon" src="/static/images/{{ stage_name }}-icon.svg" alt="{{ stage_name|upper }} stage" />
+                  <div class="stage-title">
+                    <h2>{{ stage_name|upper }} Stage</h2>
+                    <p class="stage-meta">
+                      {{ stage.passed }} passed · {{ stage.failed }} failed ·
+                      {{ stage.errors }} errors · {{ stage.skipped }} skipped ·
+                      {{ '%.0f'|format(stage.duration_ms) }} ms
+                    </p>
+                  </div>
+                  <span class="stage-count">{{ stage.total }} cases</span>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead><tr><th>Test</th><th>Status</th><th>Time</th><th>Details</th></tr></thead>
+                    <tbody>
+                      {% for case in stage.cases %}
+                        <tr>
+                          <td class="test-name">{{ case.name }}</td>
+                          <td><span class="pill status-{{ case.status.value }}">{{ case.status.value }}</span></td>
+                          <td class="time-cell">{{ '%.0f'|format(case.duration_ms) }} ms</td>
+                          <td class="detail-cell">
+                            {% if case.message %}<div class="message">{{ case.message }}</div>{% endif %}
+                            {% if case.metadata %}
+                              <div class="meta-line">
+                                {% if case.metadata.status_code %}<span class="token-key">status</span> <span class="token-value">{{ case.metadata.status_code }}</span>{% endif %}
+                                {% if case.metadata.url %}<span class="token-key">url</span> <span class="token-value">{{ case.metadata.url }}</span>{% endif %}
+                              </div>
+                            {% endif %}
+                            {% if case.logs %}<pre>{{ case.logs[:600] }}</pre>{% endif %}
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="page-nav">
+          <button class="btn btn-ghost" type="button" data-goto="summary">← Back: Summary</button>
+          <button class="btn btn-primary" type="button" data-goto="reports">Next: Saved Reports →</button>
+        </div>
+      </section>
+
+      <!-- PAGE 5 -->
+      <section class="page" id="reports">
+        <div class="section-head">
+          <div class="ai-heading">
+            <img src="/static/images/ai-icon.svg" alt="" />
+            <div><h2>Finish &amp; Exit</h2><p class="section-meta">Saved reports and final actions</p></div>
+          </div>
+          <span class="section-tag exit-tag">EXIT</span>
+        </div>
+        <section class="panel">
+          {% if saved_reports %}
+            <div class="chip-grid">
+              {% for name in saved_reports %}
+                <a class="report-chip" href="/api/reports/{{ name }}" target="_blank" rel="noopener">
+                  <span class="chip-icon">JSON</span>
+                  <span class="chip-name">{{ name }}</span>
+                  <span class="chip-arrow">↗</span>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="meta">No saved reports yet. Run a test to create the first one.</p>
+          {% endif %}
+        </section>
+
+        <section class="panel exit-panel">
+          <h3>Test run complete</h3>
+          <p class="meta">Your reports are saved. You can close this tab or start another run.</p>
+          <div class="exit-actions">
+            <button class="btn btn-primary" type="button" id="exitBtn">Finish &amp; Exit</button>
+            <button class="btn btn-ghost" type="button" id="closeTabBtn">Close Tab</button>
+            <button class="btn btn-ghost" type="button" data-goto="intro">Start Another Run</button>
+          </div>
+          <p id="exitMsg" class="exit-msg"></p>
+        </section>
+
+        <div class="page-nav">
+          <button class="btn btn-ghost" type="button" data-goto="stages">← Back: Stage Details</button>
+          <button class="btn btn-primary" type="button" data-goto="intro">Back to Start →</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">Unified Test Orchestration and Failure Analysis System · Local AI-ready pipeline</footer>
+  </div>
+
+  <script>
+    const pages = ['intro', 'input', 'summary', 'stages', 'reports'];
+
+    function showPage(id, shouldScroll = true) {
+      if (!pages.includes(id)) id = 'intro';
+      document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === id));
+      document.querySelectorAll('.step').forEach(s => s.classList.toggle('active', s.dataset.page === id));
+      history.replaceState(null, '', '#' + id);
+      if (shouldScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function currentPage() {
+      const active = document.querySelector('.page.active');
+      return active && pages.includes(active.id) ? active.id : 'intro';
+    }
+
+    document.querySelectorAll('.step').forEach(step => {
+      step.addEventListener('click', () => showPage(step.dataset.page));
+    });
+    document.querySelectorAll('[data-goto]').forEach(btn => {
+      btn.addEventListener('click', () => showPage(btn.dataset.goto));
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const name = tab.dataset.tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+      });
+    });
+
+    async function finishRun(button, originalText, response, statusEl, returnPage) {
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || 'Request failed');
+      const message = 'Finished. Report ' + body.id + ' saved. Open “Summary & AI” to view results.';
+      if (statusEl) statusEl.textContent = message;
+      sessionStorage.setItem('utoStatus', message);
+      sessionStorage.setItem('utoPage', returnPage || currentPage());
+      window.location.reload();
+    }
+
+    const runBtn = document.getElementById('runBtn');
+    runBtn.addEventListener('click', async () => {
+      runBtn.disabled = true;
+      runBtn.textContent = 'Running…';
+      try {
+        const response = await fetch('/api/run', { method: 'POST' });
+        await finishRun(runBtn, 'Run demo tests', response, null, currentPage());
+      } catch (err) {
+        alert('Run failed: ' + err.message);
+        runBtn.disabled = false;
+        runBtn.textContent = 'Run demo tests';
+      }
+    });
+
+    const customForm = document.getElementById('customForm');
+
+    function saveForm() {
+      const data = Object.fromEntries(new FormData(customForm).entries());
+      sessionStorage.setItem('utoForm', JSON.stringify(data));
+      return data;
+    }
+
+    function restoreForm() {
+      const raw = sessionStorage.getItem('utoForm');
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        Object.entries(data).forEach(([name, value]) => {
+          const field = customForm.elements[name];
+          if (field) field.value = value;
+        });
+      } catch (err) {
+        sessionStorage.removeItem('utoForm');
+      }
+    }
+
+    function clearForm() {
+      customForm.querySelectorAll('input, textarea').forEach(field => {
+        field.value = '';
+      });
+      const statusEl = document.getElementById('customStatus');
+      if (statusEl) statusEl.textContent = '';
+      sessionStorage.removeItem('utoForm');
+    }
+
+    customForm.addEventListener('input', saveForm);
+    customForm.addEventListener('change', saveForm);
+
+    customForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const submitBtn = customForm.querySelector('button[type="submit"]');
+      const statusEl = document.getElementById('customStatus');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Running…';
+      statusEl.textContent = 'Saving source and running all test stages…';
+
+      const data = saveForm();
+      try {
+        const response = await fetch('/api/run-custom', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        await finishRun(submitBtn, 'Run Custom Test', response, statusEl, 'input');
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Run Custom Test';
+      }
+    });
+
+    const exitBtn = document.getElementById('exitBtn');
+    const closeTabBtn = document.getElementById('closeTabBtn');
+    const exitMsg = document.getElementById('exitMsg');
+
+    if (exitBtn && exitMsg) {
+      exitBtn.addEventListener('click', async () => {
+        exitMsg.textContent = 'Clearing source and summary…';
+        exitBtn.disabled = true;
+        exitBtn.textContent = 'Exiting…';
+        try {
+          await fetch('/api/reset', { method: 'POST' });
+        } catch (err) {
+          // Still clear the browser state even if the reset call fails.
+        }
+        clearForm();
+        sessionStorage.removeItem('utoStatus');
+        sessionStorage.setItem('utoPage', 'intro');
+        window.location.reload();
+      });
+    }
+
+    if (closeTabBtn && exitMsg) {
+      closeTabBtn.addEventListener('click', () => {
+        exitMsg.textContent = 'Closing tab...';
+        window.close();
+        window.setTimeout(() => {
+          exitMsg.textContent = 'Your browser blocked closing. You can close the tab manually.';
+        }, 400);
+      });
+    }
+
+    restoreForm();
+
+    const target = sessionStorage.getItem('utoPage') || location.hash.slice(1) || 'intro';
+    const savedStatus = sessionStorage.getItem('utoStatus');
+    sessionStorage.removeItem('utoPage');
+    sessionStorage.removeItem('utoStatus');
+    if (savedStatus) {
+      const statusEl = document.getElementById('customStatus');
+      if (statusEl) statusEl.textContent = savedStatus;
+    }
+    showPage(target, false);
+  </script>
+</body>
+</html>

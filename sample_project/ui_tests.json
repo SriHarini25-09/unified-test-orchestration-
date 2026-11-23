@@ -1,0 +1,9 @@
+[
+  {
+    "name": "login page renders sign-in form",
+    "path": "/",
+    "selector": "form#login",
+    "expected_text": "Sign in",
+    "timeout_ms": 5000
+  }
+]
