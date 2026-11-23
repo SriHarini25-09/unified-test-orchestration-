@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1E293B"/><stop offset="1" stop-color="#0F172A"/></linearGradient>
+    <linearGradient id="liquid" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6EE7B7"/><stop offset="1" stop-color="#10B981"/></linearGradient>
+    <filter id="g"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#bg)" stroke="#334155" stroke-width="2"/>
+  <path d="M26 12h12v15l10 19c2 4-1 8-5 8H21c-4 0-7-4-5-8l10-19V12z" fill="none" stroke="#6EE7B7" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M20 40c3-2 6 2 9 0s6 2 9 0 6 2 7 0l3 6c2 4-1 8-5 8H21c-4 0-7-4-5-8l4-6z" fill="url(#liquid)" opacity=".55"/>
+  <path d="M26 12h12M28 12v14" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round"/>
+  <path d="M25 40l5 5 10-11" fill="none" stroke="#ECFDF5" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#g)"/>
+  <circle cx="45" cy="18" r="2" fill="#FBBF24"/><circle cx="19" cy="24" r="1.6" fill="#38BDF8"/>
+</svg>
